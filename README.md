@@ -3,7 +3,9 @@
 ## 项目简介
 软件项目管理系统（Software Project Management System，SPMS）是一个全栈开发的项目管理平台，提供项目全生命周期管理功能。
 
-> **说明**：前端项目框架基于 [Vue Vben Admin](https://github.com/vbenjs/vue-vben-admin) 项目修改而来，在此基础上进行了定制化开发和功能扩展。
+> **说明**：
+> - 前端项目框架基于 [Vue Vben Admin](https://github.com/vbenjs/vue-vben-admin) 项目修改而来，在此基础上进行了定制化开发和功能扩展。
+> - 后端项目基于 Node.js 的 [NestJS](https://nestjs.com/) 框架开发，采用模块化架构设计。
 
 ## 技术栈
 
