@@ -1,0 +1,420 @@
+# SPMS 添加页面规范 - 详细参考
+
+本文档提供 SPMS 框架中添加页面的完整规范和详细说明。
+
+## 目录
+
+- [路由类型](#路由类型)
+- [路由配置规范](#路由配置规范)
+- [页面组件规范](#页面组件规范)
+- [完整示例](#完整示例)
+- [常见问题](#常见问题)
+
+## 路由类型
+
+### 1. 核心路由（Core Routes）
+
+- **位置**：`src/router/routes/core/`
+- **用途**：框架内置路由，包含根路由、登录路由、404路由等
+- **特点**：禁止将业务相关路由放在核心路由中
+
+### 2. 静态路由（Static Routes）
+
+- **位置**：`src/router/routes/static/`
+- **用途**：项目启动时已确定的路由
+- **特点**：
+  - 会走权限控制（可通过 `authority` 字段控制）
+  - 适合不需要动态权限的页面
+  - 示例：帮助页面、关于页面等
+
+### 3. 动态路由（Dynamic Routes）
+
+- **位置**：`src/router/routes/modules/`
+- **用途**：根据用户权限动态生成的路由
+- **特点**：
+  - 会走权限控制
+  - 适合需要根据权限动态显示的页面
+  - 示例：仪表盘、业务模块等
+
+## 路由配置规范
+
+### 基本结构
+
+```typescript
+import type { RouteRecordRaw } from 'vue-router';
+import { $t } from '#/locales';
+
+const routes: RouteRecordRaw[] = [
+  {
+    name: 'RouteName', // 路由名称，必须唯一
+    path: '/route-path', // 路由路径
+    component: () => import('#/views/path/to/component.vue'), // 页面组件
+    redirect: '/route-path/child', // 可选：重定向路径
+    children: [], // 可选：子路由
+    meta: {
+      // Meta 配置项
+    },
+  },
+];
+
+export default routes;
+```
+
+### Meta 配置项说明
+
+| 配置项 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `title` | `string` | `''` | 页面标题，会在菜单和标签页中显示 |
+| `icon` | `string` | `''` | 图标，支持图标库（如 `lucide:home`）或 http 链接 |
+| `activeIcon` | `string` | `''` | 激活状态的图标 |
+| `keepAlive` | `boolean` | `false` | 是否开启页面缓存 |
+| `hideInMenu` | `boolean` | `false` | 是否在菜单中隐藏 |
+| `hideInTab` | `boolean` | `false` | 是否在标签页中隐藏 |
+| `hideInBreadcrumb` | `boolean` | `false` | 是否在面包屑中隐藏 |
+| `hideChildrenInMenu` | `boolean` | `false` | 是否在菜单中隐藏子页面 |
+| `authority` | `string[]` | `[]` | 权限控制，只有拥有对应权限的用户才能访问 |
+| `badge` | `string` | `''` | 徽标文本，会在菜单显示 |
+| `badgeType` | `'dot' \| 'normal'` | `'normal'` | 徽标类型，`dot` 为小红点，`normal` 为文本 |
+| `badgeVariants` | `string` | `'success'` | 徽标颜色变体 |
+| `order` | `number` | `0` | 菜单排序，数字越小越靠前 |
+| `affixTab` | `boolean` | `false` | 是否固定标签页，固定后不可关闭 |
+| `affixTabOrder` | `number` | `0` | 固定标签页的排序 |
+| `iframeSrc` | `string` | `''` | 内嵌页面的 iframe 地址 |
+| `ignoreAccess` | `boolean` | `false` | 是否忽略权限，直接可以访问 |
+| `link` | `string` | `''` | 外链跳转路径，会在新窗口打开 |
+| `maxNumOfOpenTab` | `number` | `-1` | 标签页最大打开数量 |
+| `menuVisibleWithForbidden` | `boolean` | `false` | 菜单可见但访问会被重定向到403 |
+| `openInNewWindow` | `boolean` | `false` | 是否在新窗口打开 |
+| `query` | `Recordable` | `{}` | 菜单参数，会在菜单中传递给页面 |
+| `noBasicLayout` | `boolean` | `false` | 是否不使用基础布局 |
+
+### 路由命名规范
+
+- 路由名称使用 **PascalCase**（大驼峰命名）
+- 路由名称应该与组件名称保持一致
+- 示例：`Dashboard`、`ExampleIndex`、`UserProfile`
+
+### 路由路径规范
+
+- 路径使用 **kebab-case**（短横线命名）或 **camelCase**（小驼峰命名）
+- 路径应该清晰表达页面功能
+- 示例：`/dashboard`、`/user/profile`、`/example/index`
+
+## 页面组件规范
+
+### 基本结构
+
+```vue
+<script setup lang="ts">
+// 导入依赖
+import { ref } from 'vue';
+
+// 定义组件名称（必须与路由名称一致）
+defineOptions({
+  name: 'ComponentName',
+});
+
+// 组件逻辑
+const data = ref();
+</script>
+
+<template>
+  <div class="p-6">
+    <!-- 页面内容 -->
+  </div>
+</template>
+
+<style scoped>
+/* 样式（可选） */
+</style>
+```
+
+### 组件命名规范
+
+- 组件名称使用 **PascalCase**（大驼峰命名）
+- 组件名称必须与路由名称保持一致
+- 使用 `defineOptions` 设置组件名称
+
+### 文件位置规范
+
+- 页面组件放在 `src/views/` 目录下
+- 核心页面（如帮助、关于等）放在 `src/views/_core/` 目录下
+- 业务页面按模块组织，例如：
+  - `src/views/dashboard/` - 仪表盘相关页面
+  - `src/views/user/` - 用户相关页面
+  - `src/views/example/` - 示例页面
+
+## 完整示例
+
+### 示例 1：二级路由（动态路由）
+
+**路由文件**：`src/router/routes/modules/dashboard.ts`
+
+```typescript
+import type { RouteRecordRaw } from 'vue-router';
+import { $t } from '#/locales';
+
+const routes: RouteRecordRaw[] = [
+  {
+    meta: {
+      icon: 'lucide:layout-dashboard',
+      order: -1,
+      title: $t('page.dashboard.title'),
+    },
+    name: 'Dashboard',
+    path: '/dashboard',
+    children: [
+      {
+        name: 'Analytics',
+        path: '/analytics',
+        component: () => import('#/views/dashboard/analytics/index.vue'),
+        meta: {
+          affixTab: true,
+          icon: 'lucide:area-chart',
+          title: $t('page.dashboard.analytics'),
+        },
+      },
+      {
+        name: 'Workspace',
+        path: '/workspace',
+        component: () => import('#/views/dashboard/workspace/index.vue'),
+        meta: {
+          icon: 'carbon:workspace',
+          title: $t('page.dashboard.workspace'),
+        },
+      },
+    ],
+  },
+];
+
+export default routes;
+```
+
+**页面组件**：`src/views/dashboard/analytics/index.vue`
+
+```vue
+<script setup lang="ts">
+defineOptions({
+  name: 'Analytics',
+});
+</script>
+
+<template>
+  <div class="p-6">
+    <h1 class="mb-4 text-2xl font-bold">数据分析</h1>
+    <p>这是数据分析页面。</p>
+  </div>
+</template>
+```
+
+### 示例 2：静态路由（不在菜单显示）
+
+**路由文件**：`src/router/routes/static/help.ts`
+
+```typescript
+import type { RouteRecordRaw } from 'vue-router';
+import { $t } from '#/locales';
+
+const routes: RouteRecordRaw[] = [
+  {
+    name: 'Help',
+    path: '/help',
+    component: () => import('#/views/_core/help/index.vue'),
+    meta: {
+      icon: 'lucide:help-circle',
+      hideInMenu: true, // 不在菜单中显示
+      title: $t('ui.widgets.qa'),
+    },
+  },
+];
+
+export default routes;
+```
+
+**页面组件**：`src/views/_core/help/index.vue`
+
+```vue
+<script setup lang="ts">
+defineOptions({
+  name: 'Help',
+});
+</script>
+
+<template>
+  <div class="flex h-full flex-col items-center justify-center p-8">
+    <div class="max-w-2xl text-center">
+      <h1 class="mb-4 text-3xl font-bold">问题 & 帮助</h1>
+      <p class="text-muted-foreground text-lg">
+        如果您在使用过程中遇到任何问题，可以通过以下方式获取帮助。
+      </p>
+    </div>
+  </div>
+</template>
+```
+
+### 示例 3：多级路由
+
+**路由文件**：`src/router/routes/modules/system.ts`
+
+```typescript
+import type { RouteRecordRaw } from 'vue-router';
+import { $t } from '#/locales';
+
+const routes: RouteRecordRaw[] = [
+  {
+    meta: {
+      icon: 'lucide:settings',
+      order: 100,
+      title: $t('page.system.title'),
+    },
+    name: 'System',
+    path: '/system',
+    children: [
+      {
+        meta: {
+          icon: 'lucide:users',
+          title: $t('page.system.user.title'),
+        },
+        name: 'SystemUser',
+        path: '/system/user',
+        children: [
+          {
+            name: 'SystemUserList',
+            path: '/system/user/list',
+            component: () => import('#/views/system/user/list.vue'),
+            meta: {
+              title: $t('page.system.user.list'),
+            },
+          },
+          {
+            name: 'SystemUserRole',
+            path: '/system/user/role',
+            component: () => import('#/views/system/user/role.vue'),
+            meta: {
+              title: $t('page.system.user.role'),
+            },
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export default routes;
+```
+
+## 常见问题
+
+### Q1: 路由文件创建后，页面无法访问？
+
+**A**: 检查以下几点：
+1. 确保路由文件已正确导出 `routes`
+2. 确保路由文件在正确的目录下（`static/` 或 `modules/`）
+3. 检查路由路径是否正确
+4. 检查页面组件路径是否正确
+5. 如果是动态路由，确保已登录且有相应权限
+
+### Q2: 页面组件名称必须与路由名称一致吗？
+
+**A**: 是的，强烈建议保持一致。这样可以：
+- 便于调试和追踪
+- 避免组件缓存问题
+- 符合 Vue 3 最佳实践
+
+### Q3: 如何设置页面权限？
+
+**A**: 在路由的 `meta` 中配置 `authority` 字段：
+
+```typescript
+meta: {
+  authority: ['admin', 'user'], // 需要 admin 或 user 权限
+  title: '需要权限的页面',
+}
+```
+
+### Q4: 如何让页面不在菜单中显示？
+
+**A**: 设置 `hideInMenu: true`：
+
+```typescript
+meta: {
+  hideInMenu: true,
+  title: '不在菜单显示的页面',
+}
+```
+
+### Q5: 如何设置页面图标？
+
+**A**: 在 `meta` 中配置 `icon` 字段，支持：
+- 图标库格式：`lucide:home`、`carbon:workspace`
+- HTTP 链接：`https://example.com/icon.png`
+
+### Q6: 如何固定标签页？
+
+**A**: 设置 `affixTab: true`：
+
+```typescript
+meta: {
+  affixTab: true,
+  affixTabOrder: 1, // 可选：设置排序
+  title: '固定标签页',
+}
+```
+
+### Q7: 如何开启页面缓存？
+
+**A**: 设置 `keepAlive: true`：
+
+```typescript
+meta: {
+  keepAlive: true,
+  title: '缓存页面',
+}
+```
+
+### Q8: 路由会自动注册吗？
+
+**A**: 是的，框架会自动扫描 `static/` 和 `modules/` 目录下的所有 `.ts` 文件并自动注册路由。
+
+### Q9: 静态路由和动态路由的区别？
+
+**A**: 
+- **静态路由**：项目启动时已确定，适合不需要动态权限的页面
+- **动态路由**：根据用户权限动态生成，适合需要权限控制的业务页面
+
+### Q10: 如何添加国际化？
+
+**A**: 
+1. 在路由中使用 `$t()` 函数
+2. 在对应的语言文件中添加翻译：
+
+```json
+// src/packages/locales/src/locales/zh-CN.json
+{
+  "page": {
+    "example": {
+      "title": "示例页面"
+    }
+  }
+}
+```
+
+## 验证步骤
+
+添加页面后，按以下步骤验证：
+
+1. ✅ 检查路由文件是否正确导出
+2. ✅ 检查页面组件是否存在
+3. ✅ 检查组件名称是否与路由名称一致
+4. ✅ 访问路由路径，确认页面正常显示
+5. ✅ 检查菜单中是否正确显示（如果未设置 `hideInMenu`）
+6. ✅ 检查标签页是否正确显示（如果未设置 `hideInTab`）
+7. ✅ 检查权限控制是否生效（如果设置了 `authority`）
+
+## 参考资源
+
+- [Vben Admin 路由文档](https://doc.vben.pro/guide/essentials/route.html)
+- [Vue Router 官方文档](https://router.vuejs.org/)
+- 项目示例：
+  - 动态路由示例：`src/router/routes/modules/dashboard.ts`
+  - 静态路由示例：`src/router/routes/static/help.ts`
