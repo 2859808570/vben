@@ -4,6 +4,10 @@
 
 ```bash
 web-antd/
+├── .env # 基础环境变量配置，应用的基础配置（标题、命名空间、Store 加密密钥等）
+├── .env.analyze # 分析模式环境变量，用于打包分析时的配置（可视化工具等）
+├── .env.development # 开发环境变量配置，开发环境的配置（端口、Mock 服务、DevTools 等）
+├── .env.production # 生产环境变量配置，生产环境的配置（API 地址、压缩、PWA、路由模式等）
 ├── index.html # HTML 入口文件，应用的 HTML 模板
 ├── package.json # 应用依赖配置，应用的依赖包和脚本
 ├── postcss.config.mjs # PostCSS 配置，CSS 后处理器配置
@@ -100,3 +104,46 @@ web-antd/
 ├── tsconfig.node.json # Node.js TypeScript 配置，Node 环境的 TS 配置
 └── vite.config.mts # Vite 配置文件，构建工具配置
 ```
+
+## 环境变量文件说明
+
+项目使用多个环境变量文件来管理不同环境下的配置。这些文件遵循 Vite 的环境变量加载规则：
+
+### `.env`
+基础环境变量配置文件，包含所有环境共用的基础配置：
+- `VITE_APP_TITLE`: 应用标题，显示在浏览器标签页和应用中
+- `VITE_APP_NAMESPACE`: 应用命名空间，用于区分不同的应用实例
+- `VITE_APP_STORE_SECURE_KEY`: Store 加密密钥，用于将 Pinia store 持久化到 localStorage 时的加密
+
+### `.env.development`
+开发环境配置文件，仅在运行 `npm run dev` 时生效：
+- `VITE_PORT`: 开发服务器端口号（默认：5666）
+- `VITE_BASE`: 应用的基础路径（通常为 `/`）
+- `VITE_GLOB_API_URL`: 开发环境的 API 接口地址（通常为 `/api`，通过代理转发）
+- `VITE_NITRO_MOCK`: 是否开启 Nitro Mock 服务，用于模拟后端接口
+- `VITE_DEVTOOLS`: 是否打开 Vue DevTools 调试工具
+- `VITE_INJECT_APP_LOADING`: 是否注入全局 loading 效果
+
+### `.env.production`
+生产环境配置文件，仅在运行 `npm run build` 时生效：
+- `VITE_BASE`: 应用的基础路径（通常为 `/`）
+- `VITE_GLOB_API_URL`: 生产环境的 API 接口地址（完整的后端服务地址）
+- `VITE_COMPRESS`: 打包压缩方式（可选：`none`、`brotli`、`gzip`）
+- `VITE_PWA`: 是否开启 PWA（Progressive Web App）功能
+- `VITE_ROUTER_HISTORY`: Vue Router 的路由模式（`hash` 或 `history`）
+- `VITE_INJECT_APP_LOADING`: 是否注入全局 loading 效果
+- `VITE_ARCHIVER`: 打包后是否生成 dist.zip 压缩包
+
+### `.env.analyze`
+分析模式配置文件，用于打包分析（运行 `npm run build:analyze` 时生效）：
+- `VITE_BASE`: 应用的基础路径
+- `VITE_GLOB_API_URL`: 分析模式下的 API 接口地址
+- `VITE_VISUALIZER`: 是否开启打包可视化工具，用于分析打包体积
+
+### 环境变量加载优先级
+Vite 会按照以下优先级加载环境变量（后面的会覆盖前面的）：
+1. `.env`（所有环境）
+2. `.env.[mode]`（对应模式，如 `.env.development`、`.env.production`）
+3. `.env.local`（本地配置，通常添加到 `.gitignore` 中）
+
+**注意**：所有环境变量必须以 `VITE_` 开头才能在客户端代码中访问。

@@ -110,12 +110,23 @@ cd SoftWare/frontend
 # 安装依赖
 pnpm install
 
-# 启动开发服务器
+# 启动开发服务器（开发环境）
 pnpm dev:antd
 
-# 构建生产版本
+# 构建测试版本（测试服务器环境）
+pnpm build:antd:staging
+
+# 构建生产版本（生产环境）
 pnpm build:antd
 ```
+
+#### 环境说明
+
+- **开发环境** (`pnpm dev:antd`): 使用 `.env.development` 配置，启动本地开发服务器
+- **测试环境** (`pnpm build:antd:staging`): 使用 `.env.staging` 配置，构建测试服务器部署版本
+- **生产环境** (`pnpm build:antd`): 使用 `.env.production` 配置，构建生产环境部署版本
+
+> **提示**: 构建测试版本前，请先修改 `SoftWare/frontend/apps/web-antd/.env.staging` 文件中的 `VITE_GLOB_API_URL` 为测试服务器的实际 API 地址。
 
 ### 后端开发
 
